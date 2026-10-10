@@ -1,0 +1,7 @@
+{
+  "name": "Ritz - Luxury Homes in Nagpur",
+  "description": "Where modern technology meets your dream home. Curated downtown luxury houses and bespoke selling advisory in Nagpur, India.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
