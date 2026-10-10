@@ -34,7 +34,8 @@ import {
   ZoomOut,
   RotateCcw,
   Ruler,
-  ChevronUp
+  ChevronUp,
+  Menu
 } from 'lucide-react';
 
 // High-fidelity luxury real estate assets
@@ -549,6 +550,9 @@ export default function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Mobile / tablet navigation drawer
+  const [mobileNavOpen, setMobileNavOpen] = useState<boolean>(false);
+
   // Active neighborhood in Area section
   const [activeNeighborhood, setActiveNeighborhood] = useState<number>(0);
 
@@ -624,7 +628,18 @@ export default function App() {
   const propertyB = FEATURED_PROPERTIES.find(p => p.id === comparePropB) || FEATURED_PROPERTIES[1];
   const studioProperty = FEATURED_PROPERTIES.find(p => p.id === selectedStudioPropId) || FEATURED_PROPERTIES[0];
 
+  const NAV_LINKS = [
+    { id: 'featured-properties', label: 'Downtown Houses (10)' },
+    { id: 'blueprint-studio', label: 'CAD Blueprints' },
+    { id: 'comparison', label: 'Compare Spec' },
+    { id: 'services', label: 'Selling Services' },
+    { id: 'estimator', label: 'Acquisition Estimator' },
+    { id: 'about', label: 'About Aura Living' },
+    { id: 'contact', label: 'Contact Desk' }
+  ];
+
   const scrollTo = (id: string) => {
+    setMobileNavOpen(false);
     const elem = document.getElementById(id);
     if (elem) {
       elem.scrollIntoView({ behavior: 'smooth' });
@@ -644,24 +659,24 @@ export default function App() {
 
       {/* Ambient Lighting & Architectural Grid Overlay */}
       <div className="pointer-events-none fixed inset-0 z-0 opacity-40 bg-architectural-grid" />
-      <div className="pointer-events-none fixed top-0 left-1/2 -translate-x-1/2 w-[1300px] h-[650px] bg-radial-spotlight blur-3xl z-0" />
+      <div className="pointer-events-none fixed top-0 left-1/2 -translate-x-1/2 w-[min(1300px,100vw)] h-[650px] bg-radial-spotlight blur-3xl z-0" />
       
       {/* =========================================================================
           1. TOP BAR (Strict 3-Zone Contract: Brand Wordmark | Nav Links | 1 Primary CTA)
          ========================================================================= */}
       <header className="sticky top-0 z-40 bg-[#08090b]/92 backdrop-blur-xl border-b border-white/[0.07] transition-all">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-4 xl:gap-8">
           
           {/* Zone 1: Single Text Element Wordmark - AURA LIVING */}
           <a href="#" className="flex items-center gap-2.5 group whitespace-nowrap shrink-0">
-            <span className="font-serif-display text-2xl sm:text-3xl font-semibold tracking-tight text-[#f7f4ee] group-hover:text-[#d6c7b2] transition-colors">
+            <span className="font-serif-display text-xl min-[380px]:text-2xl sm:text-3xl font-semibold tracking-tight text-[#f7f4ee] group-hover:text-[#d6c7b2] transition-colors">
               Aura Living
             </span>
             <span className="w-1.5 h-1.5 rounded-full bg-[#d6c7b2] shadow-[0_0_10px_rgba(214,199,178,0.9)]" aria-hidden="true" />
           </a>
 
           {/* Zone 2: Concise Single-line Nav Links */}
-          <nav className="hidden lg:flex items-center gap-7 text-xs uppercase tracking-widest font-medium text-[#9da1af]">
+          <nav className="hidden xl:flex items-center gap-6 text-xs uppercase tracking-widest font-medium text-[#9da1af]">
             <button 
               onClick={() => scrollTo('featured-properties')} 
               className="hover:text-[#f7f4ee] transition-colors whitespace-nowrap cursor-pointer">
@@ -701,22 +716,46 @@ export default function App() {
           </nav>
 
           {/* Zone 3: 1 Primary Action */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
               onClick={() => {
                 setTourModalOpen(true);
                 setTourSubmitted(false);
               }}
-              className="relative group overflow-hidden inline-flex items-center justify-center px-5 py-2.5 text-xs font-semibold tracking-wider uppercase text-[#08090b] bg-[#d6c7b2] hover:bg-[#e8ded0] active:scale-[0.98] transition-all rounded-md shadow-[0_0_20px_rgba(214,199,178,0.25)] whitespace-nowrap cursor-pointer">
-              <span>Schedule Viewing</span>
+              className="relative group overflow-hidden inline-flex items-center justify-center px-3 sm:px-5 py-2.5 text-[11px] sm:text-xs font-semibold tracking-wider uppercase text-[#08090b] bg-[#d6c7b2] hover:bg-[#e8ded0] active:scale-[0.98] transition-all rounded-md shadow-[0_0_20px_rgba(214,199,178,0.25)] whitespace-nowrap cursor-pointer">
+              <span className="sm:hidden">Book Viewing</span>
+              <span className="hidden sm:inline">Schedule Viewing</span>
+            </button>
+            <button
+              onClick={() => setMobileNavOpen(open => !open)}
+              className="xl:hidden p-2 rounded-md text-[#d6c7b2] bg-white/[0.04] border border-white/[0.1] hover:bg-white/[0.08] transition-colors cursor-pointer"
+              aria-label={mobileNavOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={mobileNavOpen}>
+              {mobileNavOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
+
+        {/* Mobile / tablet / small-laptop navigation drawer */}
+        {mobileNavOpen && (
+          <nav className="xl:hidden border-t border-white/[0.07] bg-[#08090b]/98 backdrop-blur-xl max-h-[calc(100vh-4rem)] overflow-y-auto">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 grid grid-cols-1 sm:grid-cols-2 gap-1">
+              {NAV_LINKS.map(link => (
+                <button
+                  key={link.id}
+                  onClick={() => scrollTo(link.id)}
+                  className="text-left px-3 py-3 rounded-lg text-sm uppercase tracking-widest font-medium text-[#9da1af] hover:text-[#f7f4ee] hover:bg-white/[0.04] transition-colors cursor-pointer">
+                  {link.label}
+                </button>
+              ))}
+            </div>
+          </nav>
+        )}
       </header>
 
       {/* QUICK CONTACT UTILITY STRIP WITH AMBIENT LIGHTING TOGGLE */}
       <div className="relative z-10 bg-[#0e1015]/85 backdrop-blur-md border-b border-white/[0.05] text-xs py-2 px-4 text-[#8e92a0]">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1.5 text-[#d6c7b2]">
               <MapPin className="w-3.5 h-3.5 text-[#d6c7b2]" />
@@ -726,7 +765,7 @@ export default function App() {
             <span className="hidden sm:inline text-[#9ea2b0]">21.1458° N, 79.0882° E · Aura Living Luxury Portfolio</span>
           </div>
 
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-3 sm:gap-5">
             {/* Ambient Lighting Mode Toggle (Stand-out feature) */}
             <div className="hidden md:flex items-center gap-1 p-0.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[11px]">
               <button
@@ -760,7 +799,7 @@ export default function App() {
               rel="noopener noreferrer" 
               className="flex items-center gap-1.5 text-[#25D366] hover:text-[#46e681] transition-colors">
               <MessageSquare className="w-3.5 h-3.5 text-[#25D366]" />
-              <span className="font-semibold tracking-wide font-mono">WhatsApp: {PHONE_DISPLAY}</span>
+              <span className="font-semibold tracking-wide font-mono"><span className="hidden sm:inline">WhatsApp: </span>{PHONE_DISPLAY}</span>
             </a>
           </div>
         </div>
@@ -770,22 +809,22 @@ export default function App() {
         {/* =========================================================================
             2. HERO SECTION - CINEMATIC ARCHITECTURAL STAGE WITH DEDICATED PROPERTY BLUEPRINTS
            ========================================================================= */}
-        <section className="relative overflow-hidden pt-10 pb-20 lg:pt-16 lg:pb-28">
+        <section className="relative overflow-hidden pt-8 pb-16 sm:pt-10 sm:pb-20 lg:pt-16 lg:pb-28">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-10 items-center">
               
               {/* Left Column: Expressive Typographic Hook & Action Controls */}
-              <div className="lg:col-span-6 space-y-7">
+              <div className="lg:col-span-6 space-y-6 sm:space-y-7 min-w-0">
                 
                 {/* Refined Architectural Kicker */}
-                <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] backdrop-blur-md text-xs font-semibold tracking-widest uppercase text-[#d6c7b2]">
+                <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] backdrop-blur-md text-[10px] sm:text-xs font-semibold tracking-wider sm:tracking-widest uppercase text-[#d6c7b2]">
                   <Sparkles className="w-3.5 h-3.5 text-[#d6c7b2]" />
                   <span>Aura Living · Distinctive Blueprints & Schematics</span>
                 </div>
 
                 {/* Main Headline with Typographic Depth */}
-                <h1 className="font-serif-display text-4xl sm:text-5xl md:text-6xl font-semibold text-[#f7f4ee] leading-[1.08] text-balance">
+                <h1 className="font-serif-display text-[2.15rem] sm:text-5xl md:text-6xl lg:text-[3.4rem] xl:text-6xl font-semibold text-[#f7f4ee] leading-[1.08] text-balance">
                   Where modern technology meets <span className="italic font-normal text-[#d6c7b2] underline decoration-1 decoration-[#d6c7b2]/40 underline-offset-8">your dream home.</span>
                 </h1>
 
@@ -820,7 +859,7 @@ export default function App() {
                 </div>
 
                 {/* Action CTA Buttons */}
-                <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+                <div className="pt-2 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3">
                   <button
                     onClick={() => scrollTo('featured-properties')}
                     className="inline-flex items-center justify-center gap-2 px-7 py-4 text-xs sm:text-sm font-semibold uppercase tracking-wider text-[#08090b] bg-[#d6c7b2] hover:bg-[#e8ded0] active:scale-[0.98] transition-all rounded-lg shadow-[0_0_25px_rgba(214,199,178,0.3)] cursor-pointer whitespace-nowrap">
@@ -864,7 +903,7 @@ export default function App() {
               </div>
 
               {/* Right Column: Hero Visual Stage with DEDICATED Property Blueprint Toggle */}
-              <div className="lg:col-span-6">
+              <div className="lg:col-span-6 min-w-0">
                 <div className="relative rounded-2xl overflow-hidden border border-white/[0.12] bg-[#111319] shadow-[0_20px_50px_rgba(0,0,0,0.8)] group">
                   
                   {/* Visual Mode Bar on top right of the hero frame */}
@@ -875,12 +914,13 @@ export default function App() {
                         viewSchematicMode ? 'bg-[#d6c7b2] text-[#08090b] font-semibold' : 'text-[#d6c7b2] hover:text-[#f7f4ee]'
                       }`}>
                       <Layers className="w-3.5 h-3.5" />
-                      <span>{viewSchematicMode ? 'Photo Mode' : `View ${currentHeroProperty.blueprint.code} Blueprint`}</span>
+                      <span className="sm:hidden">{viewSchematicMode ? 'Photo' : 'Blueprint'}</span>
+                      <span className="hidden sm:inline">{viewSchematicMode ? 'Photo Mode' : `View ${currentHeroProperty.blueprint.code} Blueprint`}</span>
                     </button>
                   </div>
 
                   {/* Hero Showcase Image (Switches to the SPECIFIC blueprint for that property!) */}
-                  <div className="relative h-[420px] sm:h-[520px] w-full overflow-hidden bg-[#14161f]">
+                  <div className="relative h-[460px] sm:h-[520px] w-full overflow-hidden bg-[#14161f]">
                     <img
                       key={currentHeroProperty.id + (viewSchematicMode ? '-blueprint' : '-photo')}
                       src={viewSchematicMode ? currentHeroProperty.blueprint.image : currentHeroProperty.image}
@@ -930,21 +970,21 @@ export default function App() {
                     )}
 
                     {/* Top Overlay Badge */}
-                    <div className="absolute top-4 left-4 flex items-center gap-2 bg-[#08090b]/80 backdrop-blur-md px-3.5 py-1.5 rounded-lg border border-white/[0.08] text-xs">
-                      <span className="w-2 h-2 rounded-full bg-[#d6c7b2]" />
-                      <span className="font-semibold text-[#d6c7b2]">{currentHeroProperty.neighborhood}</span>
-                      <span className="text-[#555a68]">·</span>
-                      <span className="text-[#f7f4ee] font-mono">{viewSchematicMode ? currentHeroProperty.blueprint.code : 'Aura Living'}</span>
+                    <div className="absolute top-4 left-4 max-w-[calc(100%-8.5rem)] sm:max-w-[calc(100%-17rem)] flex items-center gap-2 bg-[#08090b]/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/[0.08] text-xs">
+                      <span className="w-2 h-2 rounded-full bg-[#d6c7b2] shrink-0" />
+                      <span className="font-semibold text-[#d6c7b2] truncate">{currentHeroProperty.neighborhood}</span>
+                      <span className="text-[#555a68] hidden md:inline">·</span>
+                      <span className="text-[#f7f4ee] font-mono hidden md:inline whitespace-nowrap">{viewSchematicMode ? currentHeroProperty.blueprint.code : 'Aura Living'}</span>
                     </div>
 
                     {/* Floating Bottom Dossier Box */}
-                    <div className="absolute bottom-5 left-5 right-5 p-5 rounded-xl bg-[#0e1017]/90 backdrop-blur-xl border border-white/[0.1] shadow-2xl">
+                    <div className="absolute bottom-3 left-3 right-3 sm:bottom-5 sm:left-5 sm:right-5 p-4 sm:p-5 rounded-xl bg-[#0e1017]/90 backdrop-blur-xl border border-white/[0.1] shadow-2xl">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
                         <div>
                           <span className="text-[10px] font-mono uppercase tracking-wider text-[#d6c7b2] block">
                             {viewSchematicMode ? currentHeroProperty.blueprint.type : `Downtown Luxury House · ${currentHeroProperty.specs.facing}`}
                           </span>
-                          <h3 className="font-serif-display text-xl font-semibold text-[#f7f4ee]">
+                          <h3 className="font-serif-display text-lg sm:text-xl font-semibold text-[#f7f4ee]">
                             {currentHeroProperty.title}
                           </h3>
                         </div>
@@ -958,7 +998,7 @@ export default function App() {
                         {currentHeroProperty.headline}
                       </p>
 
-                      <div className="pt-3 border-t border-white/[0.08] flex items-center justify-between">
+                      <div className="pt-3 border-t border-white/[0.08] flex flex-wrap items-center justify-between gap-2">
                         <span className="text-xs font-semibold text-[#f7f4ee] tracking-wide">
                           {currentHeroProperty.priceText}
                         </span>
@@ -998,29 +1038,29 @@ export default function App() {
            ========================================================================= */}
         <section className="border-y border-white/[0.07] bg-[#0b0d11]/80 backdrop-blur-md py-9">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-left">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8 text-left">
               
               <div className="p-3 border-l-2 border-[#d6c7b2]/60 pl-5">
                 <span className="text-xs uppercase tracking-widest text-[#787c8a] block mb-1">Portfolio Class</span>
-                <span className="text-2xl sm:text-3xl font-serif-display font-semibold text-[#f7f4ee]">Luxury Homes</span>
+                <span className="text-2xl xl:text-3xl font-serif-display font-semibold text-[#f7f4ee]">Luxury Homes</span>
                 <p className="text-xs text-[#8e92a0] mt-1">10 standalone estates & multi-level residences</p>
               </div>
 
               <div className="p-3 border-l-2 border-[#d6c7b2]/60 pl-5">
                 <span className="text-xs uppercase tracking-widest text-[#787c8a] block mb-1">Featured Focus</span>
-                <span className="text-2xl sm:text-3xl font-serif-display font-semibold text-[#d6c7b2]">Downtown Houses</span>
+                <span className="text-2xl xl:text-3xl font-serif-display font-semibold text-[#d6c7b2]">Downtown Houses</span>
                 <p className="text-xs text-[#8e92a0] mt-1">Civil Lines, Ramdaspeth, Dharampeth, Byramji Town</p>
               </div>
 
               <div className="p-3 border-l-2 border-[#d6c7b2]/60 pl-5">
                 <span className="text-xs uppercase tracking-widest text-[#787c8a] block mb-1">Architectural Specs</span>
-                <span className="text-2xl sm:text-3xl font-serif-display font-semibold text-[#f7f4ee]">Custom Blueprints</span>
+                <span className="text-2xl xl:text-3xl font-serif-display font-semibold text-[#f7f4ee]">Custom Blueprints</span>
                 <p className="text-xs text-[#8e92a0] mt-1">Unique 3D schematics & floorplans per property</p>
               </div>
 
               <div className="p-3 border-l-2 border-[#d6c7b2]/60 pl-5">
                 <span className="text-xs uppercase tracking-widest text-[#787c8a] block mb-1">Aura Living Desk</span>
-                <a href={PHONE_TEL} className="text-2xl sm:text-3xl font-mono font-bold text-[#d6c7b2] hover:underline block">
+                <a href={PHONE_TEL} className="text-2xl xl:text-3xl font-mono font-bold text-[#d6c7b2] hover:underline block">
                   {PHONE_DISPLAY}
                 </a>
                 <p className="text-xs text-[#8e92a0] mt-1">Direct WhatsApp & private appointments</p>
@@ -1033,11 +1073,11 @@ export default function App() {
         {/* =========================================================================
             3. FEATURED PROPERTIES: EXPANDED TO 10 DOWNTOWN LUXURY HOUSES
            ========================================================================= */}
-        <section id="featured-properties" className="py-24 lg:py-32 relative">
+        <section id="featured-properties" className="py-16 sm:py-24 lg:py-32 relative">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
             {/* Section Header with Refined Typography */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-8">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-10 sm:mb-14 gap-6 lg:gap-8">
               <div className="max-w-2xl space-y-3">
                 <div className="inline-flex items-center gap-2 text-xs font-semibold tracking-widest uppercase text-[#c2b29c]">
                   <Layers className="w-3.5 h-3.5 text-[#d6c7b2]" />
@@ -1052,7 +1092,7 @@ export default function App() {
               </div>
 
               {/* Segmented Filter Control with Custom Styled Luxury Scroll */}
-              <div className="flex flex-col self-start md:self-auto max-w-full">
+              <div className="flex flex-col self-stretch lg:self-auto min-w-0 max-w-full lg:max-w-[50%]">
                 <div className="luxury-filter-scroll flex items-center gap-1.5 p-1.5 bg-[#12141c] rounded-xl border border-white/[0.08] overflow-x-auto max-w-full shadow-inner">
                   {['All', 'Villa', 'Waterfront Villa', 'Modern Estate', 'Multi-Level', 'Garden Estate', 'Penthouse Residence'].map((cat) => {
                     const isActive = activeCategoryFilter === cat;
@@ -1076,7 +1116,7 @@ export default function App() {
             </div>
 
             {/* Properties Grid: Rich 10-Property Multi-Card Architectural Gallery */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8">
               {filteredProperties.map((prop, idx) => (
                 <div
                   key={prop.id}
@@ -1111,10 +1151,10 @@ export default function App() {
                       
                       <div className="absolute inset-0 bg-gradient-to-t from-[#0f1118] via-transparent to-black/30 pointer-events-none" />
                       
-                      <div className="absolute top-4 left-4 flex items-center gap-2 bg-[#08090b]/85 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/[0.08] text-xs z-10">
-                        <span className="font-semibold text-[#d6c7b2]">{prop.category}</span>
+                      <div className="absolute top-4 left-4 max-w-[calc(100%-8.5rem)] flex items-center gap-2 bg-[#08090b]/85 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/[0.08] text-xs z-10">
+                        <span className="font-semibold text-[#d6c7b2] whitespace-nowrap">{prop.category}</span>
                         <span className="text-[#555a68]">·</span>
-                        <span className="text-[#f7f4ee]">{prop.neighborhood}</span>
+                        <span className="text-[#f7f4ee] truncate min-w-0">{prop.neighborhood}</span>
                       </div>
 
                       {/* Photo vs CAD Blueprint view switcher pill */}
@@ -1144,8 +1184,8 @@ export default function App() {
                         </button>
                       </div>
 
-                      <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between z-10">
-                        <span className="font-serif-display text-xl font-semibold text-[#f7f4ee]">
+                      <div className="absolute bottom-4 left-4 right-4 flex flex-wrap items-center justify-between gap-2 z-10">
+                        <span className="font-serif-display text-lg sm:text-xl font-semibold text-[#f7f4ee]">
                           {prop.priceText}
                         </span>
                         <div className="flex items-center gap-2">
@@ -1174,7 +1214,7 @@ export default function App() {
                       </div>
                     </div>
 
-                    <div className="p-6 space-y-4">
+                    <div className="p-5 sm:p-6 space-y-4">
                       <div>
                         <h3 className="font-serif-display text-xl sm:text-2xl font-semibold text-[#f7f4ee] group-hover:text-[#d6c7b2] transition-colors">
                           {prop.title}
@@ -1212,8 +1252,8 @@ export default function App() {
                       </div>
 
                       {/* Blueprint Quick Tag */}
-                      <div className="pt-1 flex items-center justify-between text-xs">
-                        <span className="text-[#787c8a]">Blueprint:</span>
+                      <div className="pt-1 flex items-center justify-between gap-3 text-xs">
+                        <span className="text-[#787c8a] shrink-0">Blueprint:</span>
                         <button
                           onClick={() => {
                             setSelectedStudioPropId(prop.id);
@@ -1221,17 +1261,17 @@ export default function App() {
                             setStudioZoom(1);
                             scrollTo('blueprint-studio');
                           }}
-                          className="text-[#d6c7b2] hover:text-[#f7f4ee] font-mono text-[11px] flex items-center gap-1.5 cursor-pointer bg-white/[0.03] px-2.5 py-1 rounded border border-white/[0.06] hover:border-[#d6c7b2]/40 transition-colors">
+                          className="min-w-0 text-[#d6c7b2] hover:text-[#f7f4ee] font-mono text-[11px] flex items-center gap-1.5 cursor-pointer bg-white/[0.03] px-2.5 py-1 rounded border border-white/[0.06] hover:border-[#d6c7b2]/40 transition-colors">
                           <Layers className="w-3 h-3 text-[#d6c7b2]" />
                           <span className="font-semibold">{prop.blueprint.code}</span>
                           <span className="text-[#555a68]">·</span>
-                          <span className="truncate max-w-[150px]">{prop.blueprint.type}</span>
+                          <span className="truncate">{prop.blueprint.type}</span>
                         </button>
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-6 pt-0 border-t border-white/[0.06] mt-3 flex items-center justify-between gap-3">
+                  <div className="px-5 sm:px-6 py-4 border-t border-white/[0.06] mt-1 flex flex-wrap items-center justify-between gap-3">
                     <a
                       href={getPropertyWhatsAppUrl(prop)}
                       target="_blank"
@@ -1262,7 +1302,7 @@ export default function App() {
         {/* =========================================================================
             STAND-OUT VISUAL: INTERACTIVE ARCHITECTURAL CAD & BLUEPRINT STUDIO
            ========================================================================= */}
-        <section id="blueprint-studio" className="py-20 lg:py-28 bg-[#090b10] border-t border-white/[0.07] relative overflow-hidden">
+        <section id="blueprint-studio" className="py-16 sm:py-20 lg:py-28 bg-[#090b10] border-t border-white/[0.07] relative overflow-hidden">
           {/* Subtle architectural background watermark */}
           <div className="absolute inset-0 bg-architectural-grid opacity-30 pointer-events-none" />
           <div className="absolute top-1/4 right-10 w-96 h-96 bg-blue-600/[0.04] rounded-full blur-3xl pointer-events-none" />
@@ -1326,7 +1366,7 @@ export default function App() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
               
               {/* Left Column: Interactive CAD Blueprint Canvas */}
-              <div className="lg:col-span-8 rounded-2xl bg-[#0c0f16] border border-white/[0.1] shadow-2xl overflow-hidden flex flex-col">
+              <div className="lg:col-span-8 min-w-0 rounded-2xl bg-[#0c0f16] border border-white/[0.1] shadow-2xl overflow-hidden flex flex-col">
                 
                 {/* CAD Canvas Top Toolbar */}
                 <div className="p-4 bg-[#11141e] border-b border-white/[0.08] flex flex-wrap items-center justify-between gap-3 text-xs">
@@ -1375,7 +1415,7 @@ export default function App() {
                 </div>
 
                 {/* Blueprint Main Image Stage */}
-                <div className="relative min-h-[380px] sm:min-h-[480px] bg-[#070d18] overflow-hidden flex items-center justify-center p-4">
+                <div className="relative min-h-[340px] sm:min-h-[480px] bg-[#070d18] overflow-hidden flex items-center justify-center px-4 py-16 sm:p-4">
                   {/* Blueprint fine grid overlay */}
                   <div className="absolute inset-0 bg-[linear-gradient(to_right,#1b2b48_1px,transparent_1px),linear-gradient(to_bottom,#1b2b48_1px,transparent_1px)] bg-[size:28px_28px] opacity-20 pointer-events-none" />
                   
@@ -1388,32 +1428,32 @@ export default function App() {
                   />
 
                   {/* Top-Left CAD Badge */}
-                  <div className="absolute top-4 left-4 bg-[#08090b]/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/[0.1] text-xs">
-                    <span className="text-[#d6c7b2] font-mono font-bold block">{studioProperty.title}</span>
+                  <div className="absolute top-3 left-3 sm:top-4 sm:left-4 max-w-[calc(100%-1.5rem)] sm:max-w-[55%] bg-[#08090b]/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/[0.1] text-xs">
+                    <span className="text-[#d6c7b2] font-mono font-bold block truncate">{studioProperty.title}</span>
                     <span className="text-[11px] text-[#8e92a0]">{studioProperty.neighborhood}, Nagpur</span>
                   </div>
 
                   {/* Top-Right Compass Orientation Indicator */}
-                  <div className="absolute top-4 right-4 bg-[#08090b]/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/[0.1] text-xs flex items-center gap-2">
+                  <div className="absolute top-4 right-4 bg-[#08090b]/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/[0.1] text-xs hidden sm:flex items-center gap-2">
                     <Compass className="w-4 h-4 text-[#d6c7b2]" />
                     <span className="font-mono text-[11px] text-[#f7f4ee]">{studioProperty.specs.facing}</span>
                   </div>
 
                   {/* Bottom-Left Cadastral Stamp */}
-                  <div className="absolute bottom-4 left-4 bg-[#08090b]/90 backdrop-blur-md px-3 py-1 rounded text-[10px] font-mono text-[#8e92a0] border border-white/[0.08] hidden sm:block">
+                  <div className="absolute bottom-4 left-4 bg-[#08090b]/90 backdrop-blur-md px-3 py-1 rounded text-[10px] font-mono text-[#8e92a0] border border-white/[0.08] hidden xl:block">
                     AURA LIVING ARCHITECTURAL SPECIFICATION · NAGPUR ARCHIVE
                   </div>
 
                   {/* Bottom-Right Level Indicator */}
-                  <div className="absolute bottom-4 right-4 bg-[#08090b]/90 backdrop-blur-md px-3 py-1 rounded text-[11px] font-mono text-[#d6c7b2] border border-[#d6c7b2]/30">
+                  <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 max-w-[calc(100%-1.5rem)] truncate bg-[#08090b]/90 backdrop-blur-md px-3 py-1 rounded text-[11px] font-mono text-[#d6c7b2] border border-[#d6c7b2]/30">
                     Active: {studioProperty.blueprint.levels[selectedStudioLevel]?.levelName || 'Primary Level'}
                   </div>
                 </div>
 
                 {/* CAD Canvas Bottom Level Switcher */}
                 <div className="p-3 bg-[#11141e] border-t border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex items-center gap-2 text-xs">
-                    <span className="text-[#8e92a0] text-xs uppercase tracking-wider font-semibold">Switch Floorplan Level:</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-xs">
+                    <span className="text-[#8e92a0] text-xs uppercase tracking-wider font-semibold shrink-0">Switch Floorplan Level:</span>
                     <div className="flex flex-wrap items-center gap-1.5">
                       {studioProperty.blueprint.levels.map((lvl, lidx) => (
                         <button
@@ -1444,7 +1484,7 @@ export default function App() {
               </div>
 
               {/* Right Column: Architectural Intelligence & Dimension Callouts */}
-              <div className="lg:col-span-4 space-y-5">
+              <div className="lg:col-span-4 space-y-5 min-w-0">
                 
                 {/* Active Level Spatial Breakdown Card */}
                 <div className="p-6 rounded-2xl bg-[#0f1118] border border-white/[0.1] space-y-4 shadow-xl">
@@ -1488,25 +1528,25 @@ export default function App() {
                   </h4>
 
                   <div className="space-y-2 text-[#9ea2b0]">
-                    <div className="flex justify-between py-1 border-b border-white/[0.04]">
+                    <div className="flex justify-between gap-4 py-1 border-b border-white/[0.04]">
                       <span>Drawing Archive Code</span>
                       <span className="font-mono text-[#d6c7b2] font-semibold">{studioProperty.blueprint.code}</span>
                     </div>
-                    <div className="flex justify-between py-1 border-b border-white/[0.04]">
+                    <div className="flex justify-between gap-4 py-1 border-b border-white/[0.04]">
                       <span>Ceiling Volume</span>
                       <span className="text-[#f7f4ee] font-semibold">{studioProperty.specs.ceilingHeight}</span>
                     </div>
-                    <div className="flex justify-between py-1 border-b border-white/[0.04]">
+                    <div className="flex justify-between gap-4 py-1 border-b border-white/[0.04]">
                       <span>Cardinal Facing</span>
                       <span className="text-[#f7f4ee] font-semibold">{studioProperty.specs.facing}</span>
                     </div>
-                    <div className="flex justify-between py-1 border-b border-white/[0.04]">
+                    <div className="flex justify-between gap-4 py-1 border-b border-white/[0.04]">
                       <span>Carpet Area</span>
                       <span className="font-mono text-[#f7f4ee] font-semibold">{studioProperty.specs.sqft}</span>
                     </div>
-                    <div className="flex justify-between py-1">
+                    <div className="flex justify-between gap-4 py-1">
                       <span>RERA Schedule</span>
-                      <span className="text-[#46e681] font-semibold">Nagpur RERA Compliant</span>
+                      <span className="text-[#46e681] font-semibold text-right">Nagpur RERA Compliant</span>
                     </div>
                   </div>
 
@@ -1544,10 +1584,10 @@ export default function App() {
         {/* =========================================================================
             STAND-OUT VISUAL: INTERACTIVE PROPERTY COMPARISON MATRIX
            ========================================================================= */}
-        <section id="comparison" className="py-20 lg:py-28 bg-[#0b0d12] border-t border-white/[0.07] relative">
+        <section id="comparison" className="py-16 sm:py-20 lg:py-28 bg-[#0b0d12] border-t border-white/[0.07] relative">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-10 sm:mb-12 gap-6">
               <div className="space-y-3 max-w-2xl">
                 <div className="inline-flex items-center gap-2 text-xs font-semibold tracking-widest uppercase text-[#c2b29c]">
                   <GitCompare className="w-4 h-4 text-[#d6c7b2]" />
@@ -1562,20 +1602,20 @@ export default function App() {
               </div>
 
               {/* Selector dropdowns */}
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full lg:w-auto">
                 <select
                   value={comparePropA}
                   onChange={(e) => setComparePropA(e.target.value)}
-                  className="px-3.5 py-2 rounded-lg bg-[#141620] border border-white/[0.1] text-xs text-[#f7f4ee] focus:border-[#d6c7b2] focus:outline-none">
+                  className="w-full sm:flex-1 lg:flex-none lg:w-auto px-3.5 py-2.5 rounded-lg bg-[#141620] border border-white/[0.1] text-xs text-[#f7f4ee] focus:border-[#d6c7b2] focus:outline-none">
                   {FEATURED_PROPERTIES.map(p => (
                     <option key={p.id} value={p.id}>{p.title}</option>
                   ))}
                 </select>
-                <span className="text-xs text-[#d6c7b2] font-semibold">VS</span>
+                <span className="text-xs text-[#d6c7b2] font-semibold text-center">VS</span>
                 <select
                   value={comparePropB}
                   onChange={(e) => setComparePropB(e.target.value)}
-                  className="px-3.5 py-2 rounded-lg bg-[#141620] border border-white/[0.1] text-xs text-[#f7f4ee] focus:border-[#d6c7b2] focus:outline-none">
+                  className="w-full sm:flex-1 lg:flex-none lg:w-auto px-3.5 py-2.5 rounded-lg bg-[#141620] border border-white/[0.1] text-xs text-[#f7f4ee] focus:border-[#d6c7b2] focus:outline-none">
                   {FEATURED_PROPERTIES.map(p => (
                     <option key={p.id} value={p.id}>{p.title}</option>
                   ))}
@@ -1584,19 +1624,19 @@ export default function App() {
             </div>
 
             {/* Comparison Side-by-Side Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
               
               {/* Residence A */}
-              <div className="p-7 rounded-2xl bg-[#0f1118] border border-white/[0.09] space-y-6 shadow-2xl">
+              <div className="p-5 sm:p-7 rounded-2xl bg-[#0f1118] border border-white/[0.09] space-y-6 shadow-2xl min-w-0">
                 <div className="flex items-start gap-4">
                   <img
                     src={propertyA.image}
                     alt={propertyA.title}
-                    className="w-24 h-24 rounded-xl object-cover shrink-0 border border-white/[0.08]"
+                    className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-cover shrink-0 border border-white/[0.08]"
                   />
                   <div>
                     <span className="text-xs text-[#d6c7b2] font-semibold">{propertyA.category} · {propertyA.neighborhood}</span>
-                    <h3 className="font-serif-display text-2xl font-semibold text-[#f7f4ee] mt-0.5">{propertyA.title}</h3>
+                    <h3 className="font-serif-display text-xl sm:text-2xl font-semibold text-[#f7f4ee] mt-0.5">{propertyA.title}</h3>
                     <p className="text-xs text-[#9ea2b0] mt-1 line-clamp-2">{propertyA.headline}</p>
                   </div>
                 </div>
@@ -1630,33 +1670,33 @@ export default function App() {
                 </div>
 
                 <div className="space-y-3 pt-3 border-t border-white/[0.06] text-xs">
-                  <div className="flex justify-between py-1.5 border-b border-white/[0.04]">
+                  <div className="flex justify-between gap-4 py-1.5 border-b border-white/[0.04]">
                     <span className="text-[#8e92a0]">Blueprint Code</span>
                     <span className="font-mono font-bold text-[#d6c7b2]">{propertyA.blueprint.code}</span>
                   </div>
-                  <div className="flex justify-between py-1.5 border-b border-white/[0.04]">
+                  <div className="flex justify-between gap-4 py-1.5 border-b border-white/[0.04]">
                     <span className="text-[#8e92a0]">Carpet Built-Up Area</span>
                     <span className="font-mono font-bold text-[#f7f4ee]">{propertyA.specs.sqft}</span>
                   </div>
-                  <div className="flex justify-between py-1.5 border-b border-white/[0.04]">
+                  <div className="flex justify-between gap-4 py-1.5 border-b border-white/[0.04]">
                     <span className="text-[#8e92a0]">Bedrooms & Master Suites</span>
                     <span className="font-semibold text-[#f7f4ee]">{propertyA.specs.beds} Master Suites</span>
                   </div>
-                  <div className="flex justify-between py-1.5 border-b border-white/[0.04]">
+                  <div className="flex justify-between gap-4 py-1.5 border-b border-white/[0.04]">
                     <span className="text-[#8e92a0]">Ceiling Volume Height</span>
                     <span className="font-semibold text-[#d6c7b2]">{propertyA.specs.ceilingHeight}</span>
                   </div>
-                  <div className="flex justify-between py-1.5 border-b border-white/[0.04]">
+                  <div className="flex justify-between gap-4 py-1.5 border-b border-white/[0.04]">
                     <span className="text-[#8e92a0]">Cardinal Orientation</span>
                     <span className="font-semibold text-[#f7f4ee]">{propertyA.specs.facing}</span>
                   </div>
-                  <div className="flex justify-between py-1.5">
+                  <div className="flex justify-between gap-4 py-1.5">
                     <span className="text-[#8e92a0]">Motor Court Parking</span>
                     <span className="font-semibold text-[#f7f4ee]">{propertyA.specs.parking} Covered Stalls</span>
                   </div>
                 </div>
 
-                <div className="pt-2 flex items-center justify-between">
+                <div className="pt-2 flex flex-wrap items-center justify-between gap-3">
                   <button
                     onClick={() => {
                       setSelectedProperty(propertyA);
@@ -1678,16 +1718,16 @@ export default function App() {
               </div>
 
               {/* Residence B */}
-              <div className="p-7 rounded-2xl bg-[#0f1118] border border-white/[0.09] space-y-6 shadow-2xl">
+              <div className="p-5 sm:p-7 rounded-2xl bg-[#0f1118] border border-white/[0.09] space-y-6 shadow-2xl min-w-0">
                 <div className="flex items-start gap-4">
                   <img
                     src={propertyB.image}
                     alt={propertyB.title}
-                    className="w-24 h-24 rounded-xl object-cover shrink-0 border border-white/[0.08]"
+                    className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-cover shrink-0 border border-white/[0.08]"
                   />
                   <div>
                     <span className="text-xs text-[#d6c7b2] font-semibold">{propertyB.category} · {propertyB.neighborhood}</span>
-                    <h3 className="font-serif-display text-2xl font-semibold text-[#f7f4ee] mt-0.5">{propertyB.title}</h3>
+                    <h3 className="font-serif-display text-xl sm:text-2xl font-semibold text-[#f7f4ee] mt-0.5">{propertyB.title}</h3>
                     <p className="text-xs text-[#9ea2b0] mt-1 line-clamp-2">{propertyB.headline}</p>
                   </div>
                 </div>
@@ -1721,33 +1761,33 @@ export default function App() {
                 </div>
 
                 <div className="space-y-3 pt-3 border-t border-white/[0.06] text-xs">
-                  <div className="flex justify-between py-1.5 border-b border-white/[0.04]">
+                  <div className="flex justify-between gap-4 py-1.5 border-b border-white/[0.04]">
                     <span className="text-[#8e92a0]">Blueprint Code</span>
                     <span className="font-mono font-bold text-[#d6c7b2]">{propertyB.blueprint.code}</span>
                   </div>
-                  <div className="flex justify-between py-1.5 border-b border-white/[0.04]">
+                  <div className="flex justify-between gap-4 py-1.5 border-b border-white/[0.04]">
                     <span className="text-[#8e92a0]">Carpet Built-Up Area</span>
                     <span className="font-mono font-bold text-[#f7f4ee]">{propertyB.specs.sqft}</span>
                   </div>
-                  <div className="flex justify-between py-1.5 border-b border-white/[0.04]">
+                  <div className="flex justify-between gap-4 py-1.5 border-b border-white/[0.04]">
                     <span className="text-[#8e92a0]">Bedrooms & Master Suites</span>
                     <span className="font-semibold text-[#f7f4ee]">{propertyB.specs.beds} Master Suites</span>
                   </div>
-                  <div className="flex justify-between py-1.5 border-b border-white/[0.04]">
+                  <div className="flex justify-between gap-4 py-1.5 border-b border-white/[0.04]">
                     <span className="text-[#8e92a0]">Ceiling Volume Height</span>
                     <span className="font-semibold text-[#d6c7b2]">{propertyB.specs.ceilingHeight}</span>
                   </div>
-                  <div className="flex justify-between py-1.5 border-b border-white/[0.04]">
+                  <div className="flex justify-between gap-4 py-1.5 border-b border-white/[0.04]">
                     <span className="text-[#8e92a0]">Cardinal Orientation</span>
                     <span className="font-semibold text-[#f7f4ee]">{propertyB.specs.facing}</span>
                   </div>
-                  <div className="flex justify-between py-1.5">
+                  <div className="flex justify-between gap-4 py-1.5">
                     <span className="text-[#8e92a0]">Motor Court Parking</span>
                     <span className="font-semibold text-[#f7f4ee]">{propertyB.specs.parking} Covered Stalls</span>
                   </div>
                 </div>
 
-                <div className="pt-2 flex items-center justify-between">
+                <div className="pt-2 flex flex-wrap items-center justify-between gap-3">
                   <button
                     onClick={() => {
                       setSelectedProperty(propertyB);
@@ -1776,10 +1816,10 @@ export default function App() {
         {/* =========================================================================
             STAND-OUT VISUAL: ARCHITECTURAL MATERIAL FINISHES & CRAFTSMANSHIP
            ========================================================================= */}
-        <section className="py-20 lg:py-28 bg-[#08090b] border-t border-white/[0.07]">
+        <section className="py-16 sm:py-20 lg:py-28 bg-[#08090b] border-t border-white/[0.07]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            <div className="max-w-3xl mb-14 space-y-3">
+            <div className="max-w-3xl mb-10 sm:mb-14 space-y-3">
               <span className="text-xs font-semibold tracking-widest uppercase text-[#c2b29c] block">
                 Engineering & Craftsmanship Standards
               </span>
@@ -1841,10 +1881,10 @@ export default function App() {
         {/* =========================================================================
             INTERACTIVE ACQUISITION & INVESTMENT ESTIMATOR (BESPOKE TOOL)
            ========================================================================= */}
-        <section id="estimator" className="py-20 lg:py-28 bg-[#0b0d12] border-t border-white/[0.07] relative overflow-hidden">
+        <section id="estimator" className="py-16 sm:py-20 lg:py-28 bg-[#0b0d12] border-t border-white/[0.07] relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
               
               {/* Left Column: Estimator Explanation */}
               <div className="lg:col-span-5 space-y-5">
@@ -1886,13 +1926,13 @@ export default function App() {
 
               {/* Right Column: Interactive Sliders & Live Results Dashboard */}
               <div className="lg:col-span-7">
-                <div className="p-7 sm:p-9 rounded-2xl bg-[#11131b] border border-white/[0.1] shadow-2xl space-y-7">
+                <div className="p-5 sm:p-9 rounded-2xl bg-[#11131b] border border-white/[0.1] shadow-2xl space-y-7">
                   
                   {/* Slider 1: Property Valuation */}
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between text-xs sm:text-sm font-semibold">
+                    <div className="flex items-center justify-between gap-3 text-xs sm:text-sm font-semibold">
                       <span className="text-[#c2b29c]">Estimated Property Value (INR)</span>
-                      <span className="font-mono text-lg text-[#d6c7b2]">₹{calculatorBudgetCr.toFixed(1)} Crore</span>
+                      <span className="font-mono text-base sm:text-lg text-[#d6c7b2] whitespace-nowrap">₹{calculatorBudgetCr.toFixed(1)} Crore</span>
                     </div>
                     <input
                       type="range"
@@ -1912,9 +1952,9 @@ export default function App() {
 
                   {/* Slider 2: Holding Horizon */}
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between text-xs sm:text-sm font-semibold">
+                    <div className="flex items-center justify-between gap-3 text-xs sm:text-sm font-semibold">
                       <span className="text-[#c2b29c]">Investment Horizon</span>
-                      <span className="font-mono text-lg text-[#d6c7b2]">{holdingYears} Years</span>
+                      <span className="font-mono text-base sm:text-lg text-[#d6c7b2] whitespace-nowrap">{holdingYears} Years</span>
                     </div>
                     <input
                       type="range"
@@ -1938,7 +1978,7 @@ export default function App() {
                       <span className="text-[11px] text-[#8e92a0] uppercase tracking-wider block mb-1">
                         Est. Stamp Duty & Fees
                       </span>
-                      <span className="font-mono text-xl font-bold text-[#f7f4ee]">
+                      <span className="font-mono text-xl lg:text-lg xl:text-xl font-bold text-[#f7f4ee]">
                         ₹{stampDutyAndReg} Cr
                       </span>
                       <span className="text-[10px] text-[#6b7080] block mt-0.5">Approx 7% Maharashtra</span>
@@ -1948,7 +1988,7 @@ export default function App() {
                       <span className="text-[11px] text-[#8e92a0] uppercase tracking-wider block mb-1">
                         Projected {holdingYears}-Yr Value
                       </span>
-                      <span className="font-mono text-xl font-bold text-[#d6c7b2]">
+                      <span className="font-mono text-xl lg:text-lg xl:text-xl font-bold text-[#d6c7b2]">
                         ₹{futureValue} Cr
                       </span>
                       <span className="text-[10px] text-[#6b7080] block mt-0.5">At 8.4% YoY CAGR</span>
@@ -1958,7 +1998,7 @@ export default function App() {
                       <span className="text-[11px] text-[#8e92a0] uppercase tracking-wider block mb-1">
                         Projected Capital Gain
                       </span>
-                      <span className="font-mono text-xl font-bold text-[#4ade80]">
+                      <span className="font-mono text-xl lg:text-lg xl:text-xl font-bold text-[#4ade80]">
                         +₹{capitalGain} Cr
                       </span>
                       <span className="text-[10px] text-[#6b7080] block mt-0.5">Estimated appreciation</span>
@@ -1980,10 +2020,10 @@ export default function App() {
         {/* =========================================================================
             4. SERVICES SECTION: SELLING LUXURY HOMES
            ========================================================================= */}
-        <section id="services" className="py-24 lg:py-32 bg-[#08090b] border-t border-white/[0.07]">
+        <section id="services" className="py-16 sm:py-24 lg:py-32 bg-[#08090b] border-t border-white/[0.07]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            <div className="max-w-3xl mb-16 space-y-3">
+            <div className="max-w-3xl mb-10 sm:mb-16 space-y-3">
               <div className="inline-flex items-center gap-2 text-xs font-semibold tracking-widest uppercase text-[#c2b29c]">
                 <Award className="w-4 h-4 text-[#d6c7b2]" />
                 <span>Specialized Mandate: Selling</span>
@@ -1999,7 +2039,7 @@ export default function App() {
             {/* Selling Capabilities Bento-Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               
-              <div className="p-8 rounded-2xl bg-[#0f1118] border border-white/[0.08] hover:border-[#d6c7b2]/40 transition-all flex flex-col justify-between group shadow-xl">
+              <div className="p-6 xl:p-8 rounded-2xl bg-[#0f1118] border border-white/[0.08] hover:border-[#d6c7b2]/40 transition-all flex flex-col justify-between group shadow-xl">
                 <div>
                   <div className="font-mono text-xs font-bold text-[#d6c7b2] tracking-widest mb-4">
                     01. PRECISION
@@ -2017,7 +2057,7 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="p-8 rounded-2xl bg-[#0f1118] border border-white/[0.08] hover:border-[#d6c7b2]/40 transition-all flex flex-col justify-between group shadow-xl">
+              <div className="p-6 xl:p-8 rounded-2xl bg-[#0f1118] border border-white/[0.08] hover:border-[#d6c7b2]/40 transition-all flex flex-col justify-between group shadow-xl">
                 <div>
                   <div className="font-mono text-xs font-bold text-[#d6c7b2] tracking-widest mb-4">
                     02. PRESENTATION
@@ -2035,7 +2075,7 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="p-8 rounded-2xl bg-[#0f1118] border border-white/[0.08] hover:border-[#d6c7b2]/40 transition-all flex flex-col justify-between group shadow-xl">
+              <div className="p-6 xl:p-8 rounded-2xl bg-[#0f1118] border border-white/[0.08] hover:border-[#d6c7b2]/40 transition-all flex flex-col justify-between group shadow-xl">
                 <div>
                   <div className="font-mono text-xs font-bold text-[#d6c7b2] tracking-widest mb-4">
                     03. BUYER MATCHING
@@ -2053,7 +2093,7 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="p-8 rounded-2xl bg-[#0f1118] border border-white/[0.08] hover:border-[#d6c7b2]/40 transition-all flex flex-col justify-between group shadow-xl">
+              <div className="p-6 xl:p-8 rounded-2xl bg-[#0f1118] border border-white/[0.08] hover:border-[#d6c7b2]/40 transition-all flex flex-col justify-between group shadow-xl">
                 <div>
                   <div className="font-mono text-xs font-bold text-[#d6c7b2] tracking-widest mb-4">
                     04. CONVEYANCING
@@ -2074,7 +2114,7 @@ export default function App() {
             </div>
 
             {/* Seller Action Strip */}
-            <div className="mt-12 p-8 rounded-2xl bg-[#11131c] border border-white/[0.09] flex flex-col lg:flex-row items-center justify-between gap-6 shadow-2xl">
+            <div className="mt-10 sm:mt-12 p-6 sm:p-8 rounded-2xl bg-[#11131c] border border-white/[0.09] flex flex-col lg:flex-row items-center justify-between gap-6 shadow-2xl">
               <div className="space-y-2 text-center lg:text-left">
                 <h4 className="font-serif-display text-xl sm:text-2xl font-semibold text-[#f7f4ee]">
                   Considering selling your luxury home or downtown house in Nagpur?
@@ -2084,7 +2124,7 @@ export default function App() {
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0 w-full sm:w-auto">
                 <button
                   onClick={() => {
                     setSellModalOpen(true);
@@ -2097,7 +2137,7 @@ export default function App() {
                   href={getWhatsAppUrl("Hello Aura Living, I own a luxury home in Nagpur and would like to discuss selling it through your private advisory.")}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-[#25D366] bg-[#141822] hover:bg-[#1a202e] border border-[#25D366]/30 rounded-lg transition-all whitespace-nowrap flex items-center gap-2">
+                  className="px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-[#25D366] bg-[#141822] hover:bg-[#1a202e] border border-[#25D366]/30 rounded-lg transition-all whitespace-nowrap flex items-center justify-center gap-2">
                   <MessageSquare className="w-4 h-4 text-[#25D366]" />
                   <span>WhatsApp Advisory</span>
                 </a>
@@ -2110,7 +2150,7 @@ export default function App() {
         {/* =========================================================================
             5. ABOUT SECTION - AURA LIVING
            ========================================================================= */}
-        <section id="about" className="py-24 lg:py-32 bg-[#0b0d12] border-t border-white/[0.07]">
+        <section id="about" className="py-16 sm:py-24 lg:py-32 bg-[#0b0d12] border-t border-white/[0.07]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
               
@@ -2120,7 +2160,7 @@ export default function App() {
                   <img
                     src={curatedLiving}
                     alt="Interior of modern luxury residence curated by Aura Living in Nagpur"
-                    className="w-full h-[420px] sm:h-[500px] object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="w-full h-[380px] sm:h-[500px] object-cover transition-transform duration-700 group-hover:scale-105"
                     referrerPolicy="no-referrer"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#08090b] via-transparent to-transparent" />
@@ -2183,10 +2223,10 @@ export default function App() {
         {/* =========================================================================
             6. WHY CHOOSE US SECTION
            ========================================================================= */}
-        <section id="why-choose-us" className="py-24 lg:py-32 bg-[#08090b] border-t border-white/[0.07]">
+        <section id="why-choose-us" className="py-16 sm:py-24 lg:py-32 bg-[#08090b] border-t border-white/[0.07]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
+            <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-16 space-y-3">
               <span className="text-xs font-semibold tracking-widest uppercase text-[#c2b29c] block">
                 Why Aura Living
               </span>
@@ -2200,7 +2240,7 @@ export default function App() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               
-              <div className="p-8 rounded-2xl bg-[#0f1118] border border-white/[0.08] hover:border-[#d6c7b2]/40 transition-all space-y-4 group shadow-xl">
+              <div className="p-6 xl:p-8 rounded-2xl bg-[#0f1118] border border-white/[0.08] hover:border-[#d6c7b2]/40 transition-all space-y-4 group shadow-xl">
                 <div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-[#d6c7b2] group-hover:scale-105 transition-transform">
                   <MapPin className="w-6 h-6 text-[#d6c7b2]" />
                 </div>
@@ -2212,7 +2252,7 @@ export default function App() {
                 </p>
               </div>
 
-              <div className="p-8 rounded-2xl bg-[#0f1118] border border-white/[0.08] hover:border-[#d6c7b2]/40 transition-all space-y-4 group shadow-xl">
+              <div className="p-6 xl:p-8 rounded-2xl bg-[#0f1118] border border-white/[0.08] hover:border-[#d6c7b2]/40 transition-all space-y-4 group shadow-xl">
                 <div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-[#d6c7b2] group-hover:scale-105 transition-transform">
                   <Compass className="w-6 h-6 text-[#d6c7b2]" />
                 </div>
@@ -2224,7 +2264,7 @@ export default function App() {
                 </p>
               </div>
 
-              <div className="p-8 rounded-2xl bg-[#0f1118] border border-white/[0.08] hover:border-[#d6c7b2]/40 transition-all space-y-4 group shadow-xl">
+              <div className="p-6 xl:p-8 rounded-2xl bg-[#0f1118] border border-white/[0.08] hover:border-[#d6c7b2]/40 transition-all space-y-4 group shadow-xl">
                 <div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-[#d6c7b2] group-hover:scale-105 transition-transform">
                   <Award className="w-6 h-6 text-[#d6c7b2]" />
                 </div>
@@ -2236,7 +2276,7 @@ export default function App() {
                 </p>
               </div>
 
-              <div className="p-8 rounded-2xl bg-[#0f1118] border border-white/[0.08] hover:border-[#d6c7b2]/40 transition-all space-y-4 group shadow-xl">
+              <div className="p-6 xl:p-8 rounded-2xl bg-[#0f1118] border border-white/[0.08] hover:border-[#d6c7b2]/40 transition-all space-y-4 group shadow-xl">
                 <div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-[#d6c7b2] group-hover:scale-105 transition-transform">
                   <Phone className="w-6 h-6 text-[#d6c7b2]" />
                 </div>
@@ -2255,10 +2295,10 @@ export default function App() {
         {/* =========================================================================
             7. TESTIMONIALS SECTION
            ========================================================================= */}
-        <section className="py-24 lg:py-32 bg-[#0b0d12] border-t border-white/[0.07]">
+        <section className="py-16 sm:py-24 lg:py-32 bg-[#0b0d12] border-t border-white/[0.07]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            <div className="max-w-2xl mx-auto text-center mb-16 space-y-3">
+            <div className="max-w-2xl mx-auto text-center mb-10 sm:mb-16 space-y-3">
               <span className="text-xs font-semibold tracking-widest uppercase text-[#c2b29c] block">
                 Client Experiences
               </span>
@@ -2270,9 +2310,9 @@ export default function App() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
               
-              <div className="p-8 rounded-2xl bg-[#0f1118] border border-white/[0.08] flex flex-col justify-between space-y-6 shadow-xl">
+              <div className="p-6 sm:p-8 rounded-2xl bg-[#0f1118] border border-white/[0.08] flex flex-col justify-between space-y-6 shadow-xl">
                 <div className="space-y-4">
                   <div className="text-xs font-mono text-[#d6c7b2] uppercase tracking-wider">
                     Sold Luxury Villa · Ramdaspeth, Nagpur
@@ -2287,7 +2327,7 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="p-8 rounded-2xl bg-[#0f1118] border border-white/[0.08] flex flex-col justify-between space-y-6 shadow-xl">
+              <div className="p-6 sm:p-8 rounded-2xl bg-[#0f1118] border border-white/[0.08] flex flex-col justify-between space-y-6 shadow-xl">
                 <div className="space-y-4">
                   <div className="text-xs font-mono text-[#d6c7b2] uppercase tracking-wider">
                     Acquired Downtown House · Civil Lines, Nagpur
@@ -2302,7 +2342,7 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="p-8 rounded-2xl bg-[#0f1118] border border-white/[0.08] flex flex-col justify-between space-y-6 shadow-xl">
+              <div className="p-6 sm:p-8 rounded-2xl bg-[#0f1118] border border-white/[0.08] flex flex-col justify-between space-y-6 shadow-xl">
                 <div className="space-y-4">
                   <div className="text-xs font-mono text-[#d6c7b2] uppercase tracking-wider">
                     Overseas Buyer · Luxury Estate in Nagpur
@@ -2325,9 +2365,9 @@ export default function App() {
         {/* =========================================================================
             8. AREA / MARKET SECTION: NAGPUR, INDIA (INTERACTIVE NEIGHBORHOOD EXPLORER)
            ========================================================================= */}
-        <section id="market-area" className="py-24 lg:py-32 bg-[#08090b] border-t border-white/[0.07]">
+        <section id="market-area" className="py-16 sm:py-24 lg:py-32 bg-[#08090b] border-t border-white/[0.07]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
               
               {/* Left Column: Interactive Neighborhood Navigator */}
               <div className="lg:col-span-6 space-y-6">
@@ -2361,8 +2401,8 @@ export default function App() {
                 </div>
 
                 {/* Active Neighborhood Card Details */}
-                <div className="p-6 rounded-2xl bg-[#0f1118] border border-white/[0.09] space-y-4 shadow-xl">
-                  <div className="flex items-center justify-between">
+                <div className="p-5 sm:p-6 rounded-2xl bg-[#0f1118] border border-white/[0.09] space-y-4 shadow-xl">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
                       <h3 className="text-lg font-serif-display font-semibold text-[#f7f4ee]">
                         {NAGPUR_NEIGHBORHOODS[activeNeighborhood].name}
@@ -2371,7 +2411,7 @@ export default function App() {
                         {NAGPUR_NEIGHBORHOODS[activeNeighborhood].tagline}
                       </p>
                     </div>
-                    <span className="font-mono text-xs text-[#d6c7b2] bg-white/[0.04] px-2.5 py-1 rounded-md border border-white/[0.08]">
+                    <span className="self-start sm:self-auto shrink-0 font-mono text-xs text-[#d6c7b2] bg-white/[0.04] px-2.5 py-1 rounded-md border border-white/[0.08]">
                       {NAGPUR_NEIGHBORHOODS[activeNeighborhood].priceRange}
                     </span>
                   </div>
@@ -2413,7 +2453,7 @@ export default function App() {
               {/* Right Column: Google Maps Dark Iframe */}
               <div className="lg:col-span-6">
                 <div className="rounded-2xl overflow-hidden border border-white/[0.1] bg-[#11131b] p-2.5 shadow-2xl">
-                  <div className="relative w-full h-[400px] sm:h-[460px] rounded-xl overflow-hidden bg-[#161822]">
+                  <div className="relative w-full h-[340px] sm:h-[460px] rounded-xl overflow-hidden bg-[#161822]">
                     <iframe
                       title="Nagpur Maharashtra Luxury Real Estate Map"
                       src="https://maps.google.com/maps?q=Nagpur,+Maharashtra,+India&t=&z=12&ie=UTF8&iwloc=&output=embed"
@@ -2447,9 +2487,9 @@ export default function App() {
         {/* =========================================================================
             9. CONTACT / INQUIRY SECTION
            ========================================================================= */}
-        <section id="contact" className="py-24 lg:py-32 bg-[#0b0d12] border-t border-white/[0.07]">
+        <section id="contact" className="py-16 sm:py-24 lg:py-32 bg-[#0b0d12] border-t border-white/[0.07]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
               
               {/* Left Column: Direct Contact Details & Brand Confidence */}
               <div className="lg:col-span-5 space-y-7">
@@ -2470,7 +2510,7 @@ export default function App() {
                   {/* Phone Direct */}
                   <a
                     href={PHONE_TEL}
-                    className="p-5 rounded-2xl bg-[#0f1118] border border-white/[0.08] hover:border-[#d6c7b2]/40 transition-all flex items-center justify-between group shadow-lg">
+                    className="p-4 sm:p-5 rounded-2xl bg-[#0f1118] border border-white/[0.08] hover:border-[#d6c7b2]/40 transition-all flex items-center justify-between gap-3 group shadow-lg">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-xl bg-white/[0.04] flex items-center justify-center text-[#d6c7b2] group-hover:scale-105 transition-transform">
                         <Phone className="w-5 h-5 text-[#d6c7b2]" />
@@ -2482,7 +2522,7 @@ export default function App() {
                         </span>
                       </div>
                     </div>
-                    <span className="text-xs font-semibold uppercase tracking-wider text-[#d6c7b2] group-hover:translate-x-1 transition-transform">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-[#d6c7b2] group-hover:translate-x-1 transition-transform whitespace-nowrap">
                       Call Now &rarr;
                     </span>
                   </a>
@@ -2492,7 +2532,7 @@ export default function App() {
                     href={getWhatsAppUrl()}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-5 rounded-2xl bg-[#0f1118] border border-white/[0.08] hover:border-[#25D366]/40 transition-all flex items-center justify-between group shadow-lg">
+                    className="p-4 sm:p-5 rounded-2xl bg-[#0f1118] border border-white/[0.08] hover:border-[#25D366]/40 transition-all flex items-center justify-between gap-3 group shadow-lg">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-xl bg-white/[0.04] flex items-center justify-center text-[#25D366] group-hover:scale-105 transition-transform">
                         <MessageSquare className="w-5 h-5 text-[#25D366]" />
@@ -2504,7 +2544,7 @@ export default function App() {
                         </span>
                       </div>
                     </div>
-                    <span className="text-xs font-semibold uppercase tracking-wider text-[#25D366] group-hover:translate-x-1 transition-transform">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-[#25D366] group-hover:translate-x-1 transition-transform whitespace-nowrap">
                       Chat Now &rarr;
                     </span>
                   </a>
@@ -2531,7 +2571,7 @@ export default function App() {
 
               {/* Right Column: Lead Capture Form */}
               <div className="lg:col-span-7">
-                <div className="p-7 sm:p-9 rounded-2xl bg-[#0f1118] border border-white/[0.09] shadow-2xl">
+                <div className="p-5 sm:p-9 rounded-2xl bg-[#0f1118] border border-white/[0.09] shadow-2xl">
                   
                   <div className="mb-8">
                     <span className="text-xs font-semibold uppercase tracking-widest text-[#c2b29c] block mb-1">
@@ -2707,7 +2747,7 @@ export default function App() {
       {/* =========================================================================
           FOOTER (Quiet Editorial Contract) - AURA LIVING
          ========================================================================= */}
-      <footer className="border-t border-white/[0.08] bg-[#07080a] py-16 text-xs text-[#787c8a] relative z-10">
+      <footer className="border-t border-white/[0.08] bg-[#07080a] pt-12 sm:pt-16 pb-28 lg:pb-16 text-xs text-[#787c8a] relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-white/[0.06]">
             
@@ -2730,16 +2770,16 @@ export default function App() {
               <span className="text-xs uppercase tracking-widest text-[#d6c7b2] font-semibold block mb-3">
                 Navigation
               </span>
-              <ul className="space-y-2 text-[#9da1af]">
-                <li><button onClick={() => scrollTo('featured-properties')} className="hover:text-[#f7f4ee] transition-colors cursor-pointer">Downtown Luxury Houses (10)</button></li>
-                <li><button onClick={() => scrollTo('blueprint-studio')} className="hover:text-[#f7f4ee] transition-colors cursor-pointer text-[#d6c7b2]">CAD Blueprints Studio (10)</button></li>
-                <li><button onClick={() => scrollTo('comparison')} className="hover:text-[#f7f4ee] transition-colors cursor-pointer">Compare Residences</button></li>
-                <li><button onClick={() => scrollTo('services')} className="hover:text-[#f7f4ee] transition-colors cursor-pointer">Selling Advisory</button></li>
-                <li><button onClick={() => scrollTo('estimator')} className="hover:text-[#f7f4ee] transition-colors cursor-pointer">Acquisition Estimator</button></li>
-                <li><button onClick={() => scrollTo('about')} className="hover:text-[#f7f4ee] transition-colors cursor-pointer">About Aura Living</button></li>
-                <li><button onClick={() => scrollTo('why-choose-us')} className="hover:text-[#f7f4ee] transition-colors cursor-pointer">Why Choose Us</button></li>
-                <li><button onClick={() => scrollTo('market-area')} className="hover:text-[#f7f4ee] transition-colors cursor-pointer">Nagpur Market Guide</button></li>
-                <li><button onClick={() => scrollTo('contact')} className="hover:text-[#f7f4ee] transition-colors cursor-pointer">Contact Desk</button></li>
+              <ul className="grid grid-cols-2 md:grid-cols-1 gap-x-4 gap-y-2 text-[#9da1af]">
+                <li><button onClick={() => scrollTo('featured-properties')} className="text-left hover:text-[#f7f4ee] transition-colors cursor-pointer">Downtown Luxury Houses (10)</button></li>
+                <li><button onClick={() => scrollTo('blueprint-studio')} className="text-left hover:text-[#f7f4ee] transition-colors cursor-pointer text-[#d6c7b2]">CAD Blueprints Studio (10)</button></li>
+                <li><button onClick={() => scrollTo('comparison')} className="text-left hover:text-[#f7f4ee] transition-colors cursor-pointer">Compare Residences</button></li>
+                <li><button onClick={() => scrollTo('services')} className="text-left hover:text-[#f7f4ee] transition-colors cursor-pointer">Selling Advisory</button></li>
+                <li><button onClick={() => scrollTo('estimator')} className="text-left hover:text-[#f7f4ee] transition-colors cursor-pointer">Acquisition Estimator</button></li>
+                <li><button onClick={() => scrollTo('about')} className="text-left hover:text-[#f7f4ee] transition-colors cursor-pointer">About Aura Living</button></li>
+                <li><button onClick={() => scrollTo('why-choose-us')} className="text-left hover:text-[#f7f4ee] transition-colors cursor-pointer">Why Choose Us</button></li>
+                <li><button onClick={() => scrollTo('market-area')} className="text-left hover:text-[#f7f4ee] transition-colors cursor-pointer">Nagpur Market Guide</button></li>
+                <li><button onClick={() => scrollTo('contact')} className="text-left hover:text-[#f7f4ee] transition-colors cursor-pointer">Contact Desk</button></li>
               </ul>
             </div>
 
@@ -2766,7 +2806,7 @@ export default function App() {
 
           </div>
 
-          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#636775]">
+          <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left text-[11px] text-[#636775]">
             <p>© {new Date().getFullYear()} Aura Living. All rights reserved. Real Estate in Nagpur, India.</p>
             <div className="flex items-center gap-4">
               <span>RERA Compliant Advisory</span>
@@ -2780,12 +2820,12 @@ export default function App() {
       {/* =========================================================================
           FIXED MOBILE CONVERSION BAR (15% Viewport Cap Compliant)
          ========================================================================= */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#08090b]/95 backdrop-blur-xl border-t border-white/[0.09] px-4 py-2.5 flex items-center justify-between gap-3 shadow-2xl">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#08090b]/95 backdrop-blur-xl border-t border-white/[0.09] px-4 pt-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] flex items-center justify-between gap-3 shadow-2xl">
         <a
           href={PHONE_TEL}
           className="flex-1 py-3 px-3 text-xs font-semibold uppercase tracking-wider text-[#d6c7b2] bg-white/[0.05] border border-white/[0.1] rounded-lg text-center flex items-center justify-center gap-1.5">
           <Phone className="w-3.5 h-3.5 text-[#d6c7b2]" />
-          <span>Call {PHONE_DISPLAY}</span>
+          <span>Call<span className="hidden min-[400px]:inline"> {PHONE_DISPLAY}</span></span>
         </a>
 
         <a
@@ -3115,7 +3155,7 @@ export default function App() {
             </button>
 
             {/* Modal Navigation Tabs: Photos vs Technical Blueprint */}
-            <div className="flex items-center gap-2 border-b border-white/[0.08] pb-4 mb-6">
+            <div className="flex flex-wrap items-center gap-2 border-b border-white/[0.08] pb-4 mb-6 pr-10">
               <button
                 onClick={() => setModalTab('photos')}
                 className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center gap-2 ${
@@ -3153,14 +3193,14 @@ export default function App() {
                     <div className="absolute top-4 left-4 bg-[#08090b]/85 backdrop-blur-md px-3 py-1.5 rounded-md border border-white/[0.08] text-xs text-[#d6c7b2] font-semibold">
                       {selectedProperty.category} · {selectedProperty.neighborhood}
                     </div>
-                    <div className="absolute top-4 right-4 bg-[#08090b]/85 backdrop-blur-md px-3 py-1.5 rounded-md border border-white/[0.08] text-xs font-mono text-[#d6c7b2]">
+                    <div className="absolute top-4 right-4 bg-[#08090b]/85 backdrop-blur-md px-3 py-1.5 rounded-md border border-white/[0.08] text-xs font-mono text-[#d6c7b2] hidden sm:block">
                       Orientation: {selectedProperty.specs.facing}
                     </div>
                   </div>
 
                   <div className="grid grid-cols-4 gap-2">
                     {selectedProperty.gallery.map((img, idx) => (
-                      <div key={idx} className="h-20 rounded-lg overflow-hidden border border-white/[0.08]">
+                      <div key={idx} className="h-16 sm:h-20 rounded-lg overflow-hidden border border-white/[0.08]">
                         <img
                           src={img}
                           alt={`${selectedProperty.title} view ${idx + 1}`}
@@ -3171,7 +3211,7 @@ export default function App() {
                     ))}
                     <div
                       onClick={() => setModalTab('blueprint')}
-                      className="h-20 rounded-lg overflow-hidden border border-[#d6c7b2]/40 relative group cursor-pointer"
+                      className="h-16 sm:h-20 rounded-lg overflow-hidden border border-[#d6c7b2]/40 relative group cursor-pointer"
                       title="Inspect 3D Blueprint">
                       <img
                         src={selectedProperty.blueprint.image}
